@@ -1,0 +1,31 @@
+{
+  "name": "dual-clientpool",
+  "version": "0.0.0",
+  "description": "Broadcast host for dualapi",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:plediii/dual-broadcast.git"
+  },
+  "keywords": [
+    "dualapi"
+  ],
+  "author": "Paul J. Ledbetter III",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/plediii/dual-broadcast.git/issues"
+  },
+  "homepage": "https://github.com/plediii/dual-broadcast.git",
+  "dependencies": {
+    "dualapi": "git://github.com/plediii/dualapi.git#master",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "gulp-jshint": "^1.8.4",
+    "jshint-stylish": "^1.0.0"
+  }
+}
