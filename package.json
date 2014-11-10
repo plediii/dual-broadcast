@@ -20,8 +20,7 @@
   },
   "homepage": "https://github.com/plediii/dual-broadcast.git",
   "dependencies": {
-    "dualapi": "git://github.com/plediii/dualapi.git#master",
-    "underscore": "^1.7.0"
+    "dualapi": "^0.8.0"
   },
   "devDependencies": {
     "gulp": "^3.8.8",
