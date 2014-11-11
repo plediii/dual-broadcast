@@ -72,7 +72,7 @@ describe('dual broadcast', function () {
         b.send(['broadcast', 'register', 'client', 'last']);
         b.send(['broadcast', 'subscribe', 'client', 'last', 'monday'], ['hunch']);
         b.send(['broadcast', 'subscribe', 'client', 'nih'], ['hunch']);
-        b.send(['disconnect', 'client', 'last'], ['hunch']);
+        b.send(['disconnect', 'client', 'last']);
         b.send(['broadcast', 'send'], ['hunch'], 'catwalk');
     });
 
@@ -83,6 +83,7 @@ describe('dual broadcast', function () {
         b.send(['broadcast', 'register', 'blood', 'pressure']);
         b.send(['broadcast', 'subscribe', 'blood', 'pressure'], ['father']);
         b.send(['broadcast', 'subscribe', 'blood', 'pressure', 'cuff'], ['father']);
+        assert.equal(2, b._clientSubscriptions.listeners('**').length);
         b.send(['disconnect', 'blood', 'pressure']);
         assert.equal(0, b.listeners(['disconnect', '**']).length);
         assert.equal(0, b._clientSubscriptions.listeners('**').length);
@@ -92,8 +93,9 @@ describe('dual broadcast', function () {
         var b = broadcast();
         b.mount(['this', 'system'], function () {});
         b.send(['broadcast', 'register', 'this', 'system']);
-        b.send(['broadcast', 'subscribe', 'this', 'sytem'], ['moment']);
+        b.send(['broadcast', 'subscribe', 'this', 'system'], ['moment']);
         b.send(['broadcast', 'subscribe', 'this', 'system', 'school'], ['not']);
+        assert.equal(2, b._clientSubscriptions.listeners('**').length);
         b.send(['broadcast', 'unsubscribe', 'this', 'system']);
         b.send(['broadcast', 'unsubscribe', 'this', 'system', 'school']);
         assert.equal(0, b.listeners(['broadcast', 'unsubscribe', '**']).length);
