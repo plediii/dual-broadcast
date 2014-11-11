@@ -1,8 +1,9 @@
 {
   "name": "dual-broadcast",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Broadcast host for dualapi",
   "main": "index.js",
+  "private": false,
   "scripts": {
     "test": "mocha"
   },
