@@ -19,7 +19,7 @@ module.exports = function () {
                     var subclient = ctxt.to.slice(2);
                     var subscription = ctxt.from;
                     var transfer = function (ctxt) {
-                        b.send(subclient, subscription, ctxt.body);
+                        b.send(subclient, ctxt.to, ctxt.body);
                     };
                     var cleanup = function () {
                         clientSubscriptions.removeListener(ctxt.from, transfer);
