@@ -24,6 +24,17 @@ describe('dual broadcast', function () {
         b.send(['broadcast', 'send'], ['effect'], 'ship');
     });
 
+    it('should preseve from address on wildcard subscriptions', function (done) {
+        var b = broadcast();
+        b.mount(['client', 'wolf'], function (msg) {
+            assert.deepEqual(msg.from, ['wallstreet', 'words']);
+            done();
+        });
+        b.send(['broadcast', 'register', 'client', 'wolf']);
+        b.send(['broadcast', 'subscribe', 'client', 'wolf'], ['wallstreet', '**']);
+        b.send(['broadcast', 'send'], ['wallstreet', 'words'], 'everbody');
+    });
+
     it('should allow unsubscribing registered clients', function (done) {
         var b = broadcast();
         b.mount(['client', 'cause'], function (msg) {
