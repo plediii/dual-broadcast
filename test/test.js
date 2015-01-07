@@ -24,6 +24,18 @@ describe('dual broadcast', function () {
         b.send(['broadcast', 'send'], ['effect'], 'ship');
     });
 
+    it('should transmit options to clients', function (done) {
+        var b = broadcast();
+        b.mount(['client', 'cause'], function (msg) {
+            assert.equal(msg.options.theres, 'more');
+            done();
+        });
+        b.send(['broadcast', 'register', 'client', 'cause']);
+        b.send(['broadcast', 'subscribe', 'client', 'cause'], ['effect']);
+        b.send(['broadcast', 'send'], ['effect'], null, { theres: 'more' });
+    });
+
+
     it('should preseve from address on wildcard subscriptions', function (done) {
         var b = broadcast();
         b.mount(['client', 'wolf'], function (msg) {

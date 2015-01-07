@@ -19,7 +19,7 @@ module.exports = function () {
                     var subclient = ctxt.to.slice(2);
                     var subscription = ctxt.from;
                     var transfer = function (ctxt) {
-                        b.send(subclient, ctxt.to, ctxt.body);
+                        b.send(subclient, ctxt.to, ctxt.body, ctxt.options);
                     };
                     var cleanup = function () {
                         clientSubscriptions.removeListener(ctxt.from, transfer);
@@ -39,7 +39,7 @@ module.exports = function () {
         }
         , send: function (ctxt, next) {
             process.nextTick(function () {
-                clientSubscriptions.send(ctxt.from, [], ctxt.body);
+                clientSubscriptions.send(ctxt.from, [], ctxt.body, ctxt.options);
             });
             next();
         }
