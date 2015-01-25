@@ -1,6 +1,6 @@
 {
   "name": "dual-broadcast",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Broadcast host for dualapi",
   "main": "index.js",
   "private": false,
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/plediii/dual-broadcast.git",
   "dependencies": {
-    "dualapi": "^0.8.0"
+    "dualapi": "^0.11.5"
   },
   "devDependencies": {
     "gulp": "^3.8.8",
