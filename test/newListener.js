@@ -8,7 +8,6 @@ describe('dual-broadcast', function () {
     
     var d;
     beforeEach(function () {
-        var api = ;
         d = (dualproto.use(require('../index')))()
         d.broadcast(['b']);
     });
