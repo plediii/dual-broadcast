@@ -1,6 +1,7 @@
 /*jslint node: true */
 "use strict";
 
+var assert = require('assert');
 
 var dualproto = require('dual-protocol');
 
