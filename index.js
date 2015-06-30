@@ -1,51 +1,34 @@
 /*jslint node: true */
 "use strict";
 
-var dualapi = require('dualapi');
-
-module.exports = function () {
-    var b = dualapi();
-
-    var clients = {};
-    var broadcasts = {};
-
-    var clientSubscriptions = dualapi({ delimiter: '/' });
-
-    b.mount(['broadcast'], {
-        register: {
-            '**': function (msg) {
-                var client = msg.to.slice(2);
-                b.mount(['broadcast', 'subscribe'].concat(client, '**'), function (ctxt) {
-                    var subclient = ctxt.to.slice(2);
+module.exports = function (Domain, libs) {
+    var _ = libs._;
+    Domain.prototype.broadcast = function (route) {
+        var d = this;
+        var subscriptions = new Domain();
+        d.mount(route, {
+            subscribe: {
+                '::subscriber': function (body, ctxt) {
+                    var subscriber = ctxt.params.subscriber;
                     var subscription = ctxt.from;
-                    var transfer = function (ctxt) {
-                        b.send(subclient, ctxt.to, ctxt.body, ctxt.options);
-                    };
-                    var cleanup = function () {
-                        clientSubscriptions.removeListener(ctxt.from, transfer);
-                        b.removeListener(['disconnect'].concat(client, '**'), cleanup);
-                        b.removeListener(['broadcast', 'unsubscribe'].concat(subclient, '**'), cleanup);
-                    };
-                    b.once(['disconnect'].concat(client, '**'), cleanup);
-                    b.once(['broadcast', 'unsubscribe'].concat(subclient), cleanup);
-
-                    clientSubscriptions.mount(subscription, transfer);
-                });
-
-                b.once(['disconnect'].concat(client, '**'), function (ctxt) {
-                    b.unmount(['*'].concat(client, '**'));
-                });
+                    console.log('mounting subscription ', subscription);
+                    subscriptions.mount(subscription, function (body, ctxt) {
+                        console.log('broadcasting ', ctxt.from, ' -> ', subscription);
+                        d.send(_.defaults({
+                            to: subscriber
+                        }, ctxt));
+                    });
+                }
             }
-        }
-        , send: function (ctxt, next) {
-            process.nextTick(function () {
-                clientSubscriptions.send(ctxt.from, [], ctxt.body, ctxt.options);
-            });
-            next();
-        }
-    });
-
-    b._clientSubscriptions = clientSubscriptions;
-
-    return b;
+            , unsubscribe: {
+                '::subscriber': function (body, ctxt) {
+                    
+                }
+            }
+            , send: function (body, ctxt) {
+                console.log('sending ', ctxt.from);
+                subscriptions.send(ctxt.from);
+            }
+        });
+    };
 };
