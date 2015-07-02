@@ -11,13 +11,12 @@ describe('dual-broadcast', function () {
     var d;
     beforeEach(function () {
         // d = (dualproto.use(require('../index')))()
-        console.log(dualapi.use);
         d = (dualapi.use(require('../index')))()
         d.broadcast(['b']);
     });
 
     it('should have listeners for subscribe', function () {
-        assert.notEqual(0, d.listeners(['b', 'subscribe', '**']).length);
+        assert.notEqual(0, d.listeners(['b', 'register', '**']).length);
     });
 
     it('should have listeners for send', function () {
@@ -38,6 +37,16 @@ describe('dual-broadcast', function () {
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['b', 'subscribe', 'client', '2'], ['source']);
         d.send(['b', 'send'], ['source']);
+    });
+
+    it('should *not* allow messages to unregistered hosts', function (done) {
+        var onecalled = false;
+        d.mount(['client', '1'], function () {
+            done('unregistered host');
+        });
+        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        d.send(['b', 'send'], ['source']);
+        done();
     });
 
     it('should *not* send messages to unsubscribed hosts', function (done) {
@@ -123,7 +132,7 @@ describe('dual-broadcast', function () {
         d.mount(['client', '1'], function () {
             done('1 called');
         });
-        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'register', 'client']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['disconnect', 'client']);
         d.send(['b', 'send'], ['source']);
