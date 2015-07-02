@@ -5,7 +5,7 @@ var assert = require('assert');
 
 var dualproto = require('dual-protocol');
 
-describe('dual-broadcast', function () {
+describe('dual-broadcast newListener', function () {
     
     var d;
     beforeEach(function () {
@@ -15,7 +15,7 @@ describe('dual-broadcast', function () {
 
     it('should send newListener messages on subscriptions', function (done) {
         var onecalled = false;
-        d.mount(['b', 'newListener', '**'], function () {
+        d.mount(['b', 'newListener'], function () {
             done();
         });
         d.send(['b', 'register', 'client', '1']);

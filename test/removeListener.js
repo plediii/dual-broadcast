@@ -5,7 +5,7 @@ var assert = require('assert');
 
 var dualproto = require('dual-protocol');
 
-describe('dual-broadcast', function () {
+describe('dual-broadcast removeListener', function () {
     
     var d;
     beforeEach(function () {
@@ -16,7 +16,7 @@ describe('dual-broadcast', function () {
     describe('unsubscribe', function () { 
         it('should send removeListner messages on unsubscribe', function (done) {
             var onecalled = false;
-            d.mount(['b', 'removeListener', '**'], function () {
+            d.mount(['b', 'removeListener'], function () {
                 done();
             });
             d.send(['b', 'register', 'client', '1']);
@@ -74,18 +74,6 @@ describe('dual-broadcast', function () {
             });
             d.send(['b', 'register', 'client', '1']);
             d.send(['b', 'subscribe', 'client', '1'], ['source']);
-            d.send(['disconnect', 'client', '1']);
-        });
-
-
-        it('should include subscription address in source ', function (done) {
-            var onecalled = false;
-            d.mount(['b', 'removeListener', '**'], function (body, ctxt) {
-                assert.deepEqual(['source', 'a'], ctxt.from);
-                done();
-            });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
             d.send(['disconnect', 'client', '1']);
         });
     });

@@ -5,7 +5,7 @@ var assert = require('assert');
 
 var dualproto = require('dual-protocol');
 
-describe('dual-broadcast', function () {
+describe('dual-broadcast mountPoint', function () {
     
     var d;
     beforeEach(function () {
