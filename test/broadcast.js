@@ -48,6 +48,26 @@ describe('dual-broadcast', function () {
         done();
     });
 
+    it('should allow multiple subscriptions per client', function (done) {
+        var acalled = false;
+        d.mount(['client', '1'], function (body) {
+            if (body === 'a') {
+                assert(!acalled);
+                acalled = true;
+            } else if (body === 'b') {
+                assert(acalled);
+                done();
+            } else {
+                done('unexpected call ' + body);
+            }
+        });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source', 'b']);
+        d.send(['b', 'send'], ['source', 'a'], 'a');
+        d.send(['b', 'send'], ['source', 'b'], 'b');
+    });
+
     it('should *not* send messages to unsubscribed hosts', function (done) {
         var onecalled = false;
         d.mount(['client', '1'], function () {
@@ -62,6 +82,23 @@ describe('dual-broadcast', function () {
         d.send(['b', 'subscribe', 'client', '2'], ['source']);
         d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
         d.send(['b', 'send'], ['source']);
+    });
+
+    it('should allow unsubscriptions for particular sources', function (done) {
+        var acalled = false;
+        d.mount(['client', '1'], function (body) {
+            if (body === 'b') {
+                done();
+            } else {
+                done('unexpected call ' + body);
+            }
+        });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source', 'a'], 'a');
+        d.send(['b', 'subscribe', 'client', '1'], ['source', 'b'], 'b');
+        d.send(['b', 'unsubscribe', 'client', '1'], ['source', 'a']);
+        d.send(['b', 'send'], ['source', 'a'], 'a');
+        d.send(['b', 'send'], ['source', 'b'], 'b');
     });
 
     it('should send body to subscribed hosts', function (done) {
