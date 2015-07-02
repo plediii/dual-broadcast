@@ -14,11 +14,11 @@ describe('dual-broadcast', function () {
 
     it('should listen on "broadcast" by default', function () {
         d.broadcast();
-        assert.notEqual(0, d.listeners(['broadcast', 'subscribe', '**']).length);
+        assert.notEqual(0, d.listeners(['broadcast', 'register', '**']).length);
     });
 
     it('should listen on provided route if provided', function () {
         d.broadcast(['c']);
-        assert.notEqual(0, d.listeners(['c', 'subscribe', '**']).length);
+        assert.notEqual(0, d.listeners(['c', 'register', '**']).length);
     });
 });
