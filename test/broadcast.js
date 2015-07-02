@@ -4,12 +4,15 @@
 var assert = require('assert');
 
 var dualproto = require('dual-protocol');
+var dualapi = require('dualapi');
 
 describe('dual-broadcast', function () {
     
     var d;
     beforeEach(function () {
-        d = (dualproto.use(require('../index')))()
+        // d = (dualproto.use(require('../index')))()
+        console.log(dualapi.use);
+        d = (dualapi.use(require('../index')))()
         d.broadcast(['b']);
     });
 
@@ -30,6 +33,8 @@ describe('dual-broadcast', function () {
             assert(onecalled);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'register', 'client', '2']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['b', 'subscribe', 'client', '2'], ['source']);
         d.send(['b', 'send'], ['source']);
@@ -43,6 +48,8 @@ describe('dual-broadcast', function () {
         d.mount(['client', '2'], function () {
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'register', 'client', '2']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['b', 'subscribe', 'client', '2'], ['source']);
         d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
@@ -54,8 +61,10 @@ describe('dual-broadcast', function () {
             assert.deepEqual({ symbol: 'transcode' }, body);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'register', 'client', '2']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source'], { symbol: transcode });
+        d.send(['b', 'send'], ['source'], { symbol: 'transcode' });
     });
 
     it('should send options to subscribed hosts', function (done) {
@@ -63,6 +72,7 @@ describe('dual-broadcast', function () {
             assert.deepEqual({ dial: 'home' }, ctxt.options);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['b', 'send'], ['source'], null, { dial: 'home' });
     });
@@ -72,21 +82,18 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['piece', 'of', 'cacke'], ctxt.from);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['piece', 'of', 'cacke']);
         d.send(['b', 'send'], ['piece', 'of', 'cacke']);
     });
 
     it('should allow wild card subscriptions', function (done) {
-        var onecalled = false;
-        d.mount(['client', '1'], function () {
-            onecalled = true;
-        });
-        d.mount(['client', '2'], function () {
-            assert(onecalled);
+        d.mount(['client', '1'], function (body, ctxt) {
             done();
         });
-        d.send(['b', 'subscribe', 'client', '*'], ['source']);
-        d.send(['b', 'send'], ['source']);
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
+        d.send(['b', 'send'], ['piece', 'a', 'cacke']);
     });
 
     it('should send with message "from" even on wildcard subscription', function (done) {
@@ -94,6 +101,7 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['piece', 'a', 'cacke'], ctxt.from);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
         d.send(['b', 'send'], ['piece', 'a', 'cacke']);
     });
@@ -103,29 +111,33 @@ describe('dual-broadcast', function () {
         d.mount(['client', '1'], function () {
             done('1 called');
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
         d.send(['disconnect', 'client', '1']);
         d.send(['b', 'send'], ['source']);
         done();
     });
 
-    it('should *not* unsubscribe less particular clients from wild card subscriptions', function (done) {
+    it('should auto unsubscribe disconnected sub hosts', function (done) {
         var onecalled = false;
-        d.mount(['client', '2'], function () {
-            done();
+        d.mount(['client', '1'], function () {
+            done('1 called');
         });
-        d.send(['b', 'subscribe', 'client', '*'], ['source']);
-        d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        d.send(['disconnect', 'client']);
         d.send(['b', 'send'], ['source']);
+        done();
     });
 
-    it('should *not* unsubscribe less particular clients from wild card subscriptions on disconnect', function (done) {
-        var onecalled = false;
-        d.mount(['client', '2'], function () {
+    it('should *not* unsubscribe less particular subscriptions', function (done) {
+        d.mount(['client', '1'], function (body, ctxt) {
+            assert.deepEqual(['piece', 'a', 'cacke'], ctxt.from);
             done();
         });
-        d.send(['b', 'subscribe', 'client', '*'], ['source']);
-        d.send(['disconnect', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source']);
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
+        d.send(['b', 'unsubscribe', 'client', '1'], ['piece', 'a', 'cacke']);
+        d.send(['b', 'send'], ['piece', 'a', 'cacke']);
     });
 });

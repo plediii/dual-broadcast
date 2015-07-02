@@ -18,6 +18,7 @@ describe('dual-broadcast', function () {
         d.mount(['b', 'newListener', '**'], function () {
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
     });
 
@@ -27,17 +28,9 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['client', '1'], ctxt.params.subscriber);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
     });
-
-    // it('should include exact subscriber address in body ', function (done) {
-    //     var onecalled = false;
-    //     d.mount(['b', 'newListener', '::subscriber'], function (body, ctxt) {
-    //         assert.deepEqual(['client', '1'], body);
-    //         done();
-    //     });
-    //     d.send(['b', 'subscribe', 'client', '1'], ['source']);
-    // });
 
     it('should include subscription address in source ', function (done) {
         var onecalled = false;
@@ -45,6 +38,7 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['source', 'a'], ctxt.from);
             done();
         });
+        d.send(['b', 'register', 'client', '1']);
         d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
     });
 });
