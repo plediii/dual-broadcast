@@ -20,9 +20,6 @@
     "url": "https://github.com/plediii/dual-broadcast.git/issues"
   },
   "homepage": "https://github.com/plediii/dual-broadcast.git",
-  "dependencies": {
-    "dualapi": "^0.11.5"
-  },
   "devDependencies": {
     "dual-protocol": "^0.3.0",
     "gulp": "^3.8.8",

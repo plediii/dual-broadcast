@@ -4,14 +4,13 @@
 var assert = require('assert');
 
 var dualproto = require('dual-protocol');
-var dualapi = require('dualapi');
 
 describe('dual-broadcast', function () {
     
     var d;
     beforeEach(function () {
         // d = (dualproto.use(require('../index')))()
-        d = (dualapi.use(require('../index')))()
+        d = (dualproto.use(require('../index')))()
         d.broadcast(['b']);
     });
 
