@@ -51,6 +51,7 @@ describe('dual-broadcast removeListener', function () {
                 done();
             });
             d.send(['b', 'register', 'client', '1']);
+            d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
             d.send(['b', 'unsubscribe', 'client', '1'], ['source', 'a']);
         });
     });
