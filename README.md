@@ -1,5 +1,5 @@
 
-# Broadcaster for dualapi.
+# Broadcaster for dualapi [![Build Status](http://jenkins.plediii.net:8080/buildStatus/icon?job=dual-broadcast master)](http://jenkins.plediii.net:8080/job/dual-broadcast%20master/)
 
 Create a dual api domain with fan-out capability.  
 
