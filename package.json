@@ -22,11 +22,9 @@
   },
   "homepage": "https://github.com/plediii/dual-broadcast.git",
   "devDependencies": {
+    "dual-protocol": "^0.4.2",
     "istanbul": "^0.3.14",
     "mocha": "^1.21.4",
     "tape": "^4.0.0"
-  },
-  "dependencies": {
-    "dual-protocol": "^0.3.0"
   }
 }
