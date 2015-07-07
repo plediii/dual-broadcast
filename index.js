@@ -1,51 +1,68 @@
 /*jslint node: true */
 "use strict";
 
-var dualapi = require('dualapi');
+module.exports = function (Domain, libs) {
+    var _ = libs._;
+    Domain.prototype.broadcast = function (route) {
+        if (!_.isArray(route)) {
+            route = ['broadcast'];
+        }
+        var d = this;
+        var subscriptions = new Domain();
+        d.mount(route, {
+            register: {
+                '::client': function (body, ctxt) {
+                    var client = ctxt.params.client;
+                    var clientSubscriptions = new Domain();
+                    var unsubscribeRoute = route.concat('unsubscribe').concat(client);
+                    var subscribeRoute = route.concat('subscribe').concat(client);
 
-module.exports = function () {
-    var b = dualapi();
-
-    var clients = {};
-    var broadcasts = {};
-
-    var clientSubscriptions = dualapi({ delimiter: '/' });
-
-    b.mount(['broadcast'], {
-        register: {
-            '**': function (msg) {
-                var client = msg.to.slice(2);
-                b.mount(['broadcast', 'subscribe'].concat(client, '**'), function (ctxt) {
-                    var subclient = ctxt.to.slice(2);
-                    var subscription = ctxt.from;
-                    var transfer = function (ctxt) {
-                        b.send(subclient, ctxt.to, ctxt.body, ctxt.options);
+                    var unsubscribe = function (subscription) {
+                        clientSubscriptions.removeAllListeners(subscription);
                     };
-                    var cleanup = function () {
-                        clientSubscriptions.removeListener(ctxt.from, transfer);
-                        b.removeListener(['disconnect'].concat(client, '**'), cleanup);
-                        b.removeListener(['broadcast', 'unsubscribe'].concat(subclient, '**'), cleanup);
-                    };
-                    b.once(['disconnect'].concat(client, '**'), cleanup);
-                    b.once(['broadcast', 'unsubscribe'].concat(subclient), cleanup);
 
-                    clientSubscriptions.mount(subscription, transfer);
-                });
+                    clientSubscriptions.on(['removeListener'], function (subscription, f) {
+                        subscriptions.removeListener(subscription, f);
+                        d.send(route.concat(['removeListener']), subscription);
+                        d.send(route.concat(['removeListener'].concat(client)), subscription);
+                    });
 
-                b.once(['disconnect'].concat(client, '**'), function (ctxt) {
-                    b.unmount(['*'].concat(client, '**'));
+                    d.mount(subscribeRoute, function (body, ctxt) {
+                        var subscription = ctxt.from;
+                        var transfer = function (body, ctxt) {
+                            d.send({
+                                to: client
+                                , from: ctxt.from
+                                , body: body
+                                , options: ctxt.options
+                            });
+                        };
+
+                        subscriptions.mount(subscription, transfer);
+                        clientSubscriptions.on(subscription, transfer);
+                        d.send(route.concat(['newListener']), subscription);
+                        d.send(route.concat(['newListener'].concat(client)), subscription);
+                    });
+                    d.mount(unsubscribeRoute, function (body, ctxt) {
+                        var subscription = ctxt.from;
+                        unsubscribe(subscription);
+                    });
+                    d.once(['disconnect'].concat(client), function () {
+                        d.unmount(subscribeRoute);
+                        d.unmount(unsubscribeRoute);
+                        unsubscribe('**');
+                    });
+                }
+            }
+            , send: function (body, ctxt) {
+                var subscription = ctxt.from;
+                subscriptions.send({
+                    to: subscription
+                    , from: subscription
+                    , body: body
+                    , options: ctxt.options
                 });
             }
-        }
-        , send: function (ctxt, next) {
-            process.nextTick(function () {
-                clientSubscriptions.send(ctxt.from, [], ctxt.body, ctxt.options);
-            });
-            next();
-        }
-    });
-
-    b._clientSubscriptions = clientSubscriptions;
-
-    return b;
+        });
+    };
 };
