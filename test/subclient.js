@@ -52,4 +52,33 @@ describe('dual-broadcast subroutes', function () {
         d.send(['b', 'send'], ['source']);
     });
 
+    it('should emit removeListener events when unsubscribing sub clients', function (done) {
+        d.mount(['b', 'removeListener'], function () {
+            done();
+        });
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'unsubscribe', 'client', 'a', 'subhost'], ['source']);
+    });
+
+    it('should emit removeListener events with subscription in destination when unsubscribing sub clients', function (done) {
+        d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+            assert.deepEqual(['source'], ctxt.params.subscription)
+            done();
+        });
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'unsubscribe', 'client', 'a', 'subhost'], ['source']);
+    });
+
+    it('should emit removeListener events with subscriber as body when unsubscribing sub clients', function (done) {
+        d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+            assert.deepEqual(['client', 'a', 'subhost'], body)
+            done();
+        });
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'unsubscribe', 'client', 'a', 'subhost'], ['source']);
+    });
+
 });
