@@ -56,7 +56,6 @@ module.exports = function (Domain, libs) {
                     d.mount(unsubscribeRoute.concat('**'), unsubscribe);
                     d.once(['disconnect'].concat(client), function () {
                         d.unmount(subscribeRoute);
-                        d.unmount(subscribeRoute.concat('**'));
                         d.unmount(unsubscribeRoute);
                         removeSubscription('**');
                     });
