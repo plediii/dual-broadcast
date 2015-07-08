@@ -23,6 +23,19 @@ describe('dual-broadcast removeListener', function () {
             d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
         });
 
+        it('should send removeListner messages after removing subscription', function (done) {
+            d.mount(['client', '1'], function () {
+                done('emitted unsubscribed event');
+            });
+            d.mount(['b', 'removeListener'], function () {
+                d.send(['b', 'send'], ['source']);
+                done();
+            });
+            d.send(['b', 'register', 'client', '1']);
+            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+        });
+
         it('should include subscription address in destination ', function (done) {
             d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
                 assert.deepEqual(['source'], ctxt.params.subscription);
