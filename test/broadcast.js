@@ -22,6 +22,33 @@ describe('dual-broadcast', function () {
         assert.notEqual(0, d.listeners(['b', 'send']).length);
     });
 
+    it('should provide subscribe routes after registering', function () {
+        d.send(['b', 'register', 'client', '1']);
+        assert.notEqual(0, d.listeners(['b', 'subscribe', 'client', '1']));
+        assert.notEqual(0, d.listeners(['b', 'subscribe', 'client', '1', '**']));
+    });
+
+    it('should remove subscribe routes on client disconnect', function () {
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['disconnect', 'client', '1']);
+        assert.equal(0, d.listeners(['b', 'subscribe', 'client', '1']));
+        assert.equal(0, d.listeners(['b', 'subscribe', 'client', '1', '**']));
+    });
+
+    it('should provide unsubscribe routes after registering', function () {
+        d.send(['b', 'register', 'client', '1']);
+        assert.notEqual(0, d.listeners(['b', 'unsubscribe', 'client', '1']));
+        assert.notEqual(0, d.listeners(['b', 'unsubscribe', 'client', '1', '**']));
+    });
+
+    it('should remove unsubscribe routes on client disconnect', function () {
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['disconnect', 'client', '1']);
+        assert.equal(0, d.listeners(['b', 'unsubscribe', 'client', '1']));
+        assert.equal(0, d.listeners(['b', 'unsubscribe', 'client', '1', '**']));
+    });
+
+
     it('should send messages to subscribed hosts', function (done) {
         var onecalled = false;
         d.mount(['client', '1'], function () {
