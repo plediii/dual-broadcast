@@ -13,13 +13,10 @@ module.exports = function (Domain, libs) {
             register: {
                 '::client': function (body, ctxt) {
                     var client = ctxt.params.client;
+                    var prefixlen = ctxt.to.length - client.length;
                     var clientSubscriptions = new Domain();
                     var unsubscribeRoute = route.concat('unsubscribe').concat(client);
                     var subscribeRoute = route.concat('subscribe').concat(client);
-
-                    var unsubscribe = function (subscription) {
-                        clientSubscriptions.removeAllListeners(subscription);
-                    };
 
                     clientSubscriptions.on(['removeListener'], function (subscription, f) {
                         subscriptions.removeListener(subscription, f);
@@ -27,11 +24,12 @@ module.exports = function (Domain, libs) {
                         d.send(route.concat(['removeListener'].concat(client)), subscription);
                     });
 
-                    d.mount(subscribeRoute, function (body, ctxt) {
+                    var subscribe = function (body, ctxt) {
                         var subscription = ctxt.from;
+                        var subclient = ctxt.to.slice(prefixlen);
                         var transfer = function (body, ctxt) {
                             d.send({
-                                to: client
+                                to: subclient
                                 , from: ctxt.from
                                 , body: body
                                 , options: ctxt.options
@@ -42,15 +40,25 @@ module.exports = function (Domain, libs) {
                         clientSubscriptions.on(subscription, transfer);
                         d.send(route.concat(['newListener']), subscription);
                         d.send(route.concat(['newListener'].concat(client)), subscription);
-                    });
-                    d.mount(unsubscribeRoute, function (body, ctxt) {
-                        var subscription = ctxt.from;
-                        unsubscribe(subscription);
-                    });
+                    };
+
+                    var removeSubscription = function (subscription) {
+                        clientSubscriptions.removeAllListeners(subscription);
+                    };
+                    
+                    var unsubscribe = function (body, ctxt) {
+                        removeSubscription(ctxt.from);
+                    };
+
+                    d.mount(subscribeRoute, subscribe);
+                    d.mount(subscribeRoute.concat('**'), subscribe);
+                    d.mount(unsubscribeRoute, unsubscribe);
+                    d.mount(unsubscribeRoute.concat('**'), unsubscribe);
                     d.once(['disconnect'].concat(client), function () {
                         d.unmount(subscribeRoute);
+                        d.unmount(subscribeRoute.concat('**'));
                         d.unmount(unsubscribeRoute);
-                        unsubscribe('**');
+                        removeSubscription('**');
                     });
                 }
             }
