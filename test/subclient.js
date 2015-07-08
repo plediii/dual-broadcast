@@ -5,7 +5,7 @@ var assert = require('assert');
 
 var dualproto = require('dual-protocol');
 
-describe('dual-broadcast newListener', function () {
+describe('dual-broadcast subroutes', function () {
     
     var d;
     beforeEach(function () {
@@ -17,8 +17,8 @@ describe('dual-broadcast newListener', function () {
         d.mount(['client', 'a', 'subhost'], function () {
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1', 'subhost'], ['source']);
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
         d.send(['b', 'send'], ['source']);
     });
     
@@ -26,9 +26,9 @@ describe('dual-broadcast newListener', function () {
         d.mount(['client', 'a', 'subhost'], function () {
             done('unsubscribed client was called');
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1', 'subhost'], ['source']);
-        d.send(['b', 'unsubscribe', 'client', '1', 'subhost'], ['source']);
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'unsubscribe', 'client', 'a', 'subhost'], ['source']);
         d.send(['b', 'send'], ['source']);
         done();
     });
