@@ -21,6 +21,18 @@ describe('dual-broadcast newListener', function () {
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
     });
 
+    it('should send newListener messages after mounting subscriber', function (done) {
+        d.mount(['client', '1'], function () {
+            done();
+        });
+        d.mount(['b', 'newListener'], function () {
+            d.send(['b', 'send'], ['source']);
+        });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+    });
+
+
     it('should include subscription address in source ', function (done) {
         d.mount(['b', 'newListener', '::subscription'], function (body, ctxt) {
             assert.deepEqual(['source'], ctxt.from);
