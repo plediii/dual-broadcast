@@ -20,8 +20,8 @@ module.exports = function (Domain, libs) {
 
                     clientSubscriptions.on(['removeListener'], function (subscription, f) {
                         subscriptions.removeListener(subscription, f);
-                        d.send(route.concat(['removeListener']), subscription);
-                        d.send(route.concat(['removeListener'].concat(client)), subscription);
+                        d.send(route.concat(['removeListener']), subscription, f.client);
+                        d.send(route.concat(['removeListener'].concat(subscription)), subscription, f.client);
                     });
 
                     var subscribe = function (body, ctxt) {
@@ -35,7 +35,7 @@ module.exports = function (Domain, libs) {
                                 , options: ctxt.options
                             });
                         };
-
+                        transfer.client = subclient;
                         subscriptions.mount(subscription, transfer);
                         clientSubscriptions.on(subscription, transfer);
                         d.send(route.concat(['newListener']), subscription, subclient);
