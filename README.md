@@ -10,13 +10,15 @@ Any [dual-protocol](https://github.com/plediii/dual-protocol) domain (including 
 var dual = require('dual-protocol').use(require('dual-broadcast'));
 ```
 
-Then domain instances can add broadcast hosts:
+Domains with this extension can add broadcast hosts:
 ```javascript
 var domain = dual();
 domain.broadcast(['b']);
 ```
 
-Here we've provided a specific mount point for the broadcaster.  By default, the broadcaster is mounted at `['broadcast']`.
+Here we've provided a specific mount point for the broadcaster at
+`['b']`.  All the broadcaster functions will be mounted below this
+route.  By default, the broadcaster is mounted at `['broadcast']`.
 
 
 ## Register a broadcast recipient
@@ -28,17 +30,18 @@ domain.send(['b', 'register', 'client', xxxxx]);
 ```
 
 A map of subscriptions is created for each client.  The subscriptions
-will be removed when a `['disconnect', 'client', xxxx]` event is
+will be removed when the `['disconnect', 'client', xxxx]` event is
 emitted.
 
 ## Subscribe a registered client to a broadcast channel
 
 To subscribe the registered `['client', xxxxx]` to the broadcast point `['bbc',
-'eight']`, send to the subscription host from the broadcast point.
+'eight']`, send to
 
-```javascript
-domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']);
-```
+```javascript domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']); ``` 
+with the broadcast point as the source address.  Using the source
+address allows the broadcast source to be automatically layered by transports like
+[dual-engine.io](https://github.com/plediii/dual-engine.io).
 
 ## Broadcasting
 
@@ -61,8 +64,7 @@ domain.send(['b', 'unsubscribe', 'client', xxxxx], ['bbc', 'eight']);
 ## Disconnecting
 
 A client is unsubscribed from all subscriptions, and removed as a
-potential subscription host, by sending a disconnect message.
-
+potential subscription host, by sending a disconnect message:
 ```javascript
 domain.send(['disconnect', 'client', xxxxx]);
 ```
