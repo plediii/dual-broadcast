@@ -70,6 +70,15 @@ module.exports = function (Domain, libs) {
                     , options: ctxt.options
                 });
             }
+            , autoregister: {
+                '::clients': function (body, ctxt) {
+                    var clients = ctxt.params.clients;
+                    var prefixlen = ctxt.to.length - clients.length;
+                    d.mount(['connect'].concat(clients), function (body, ctxt) {
+                        d.send(route.concat('register').concat(ctxt.to.slice(1)));
+                    });
+                }
+            }
         });
     };
 };
