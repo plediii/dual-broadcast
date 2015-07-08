@@ -3,39 +3,50 @@
 
 Create a dual api domain with fan-out capability.  
 
-
 ## Construct a broadcasting domain
 
+Any [dual-protocol](https://github.com/plediii/dual-protocol) domain (including [dualapi](https://github.com/plediii/dualapi)), can be extended with dual-broadcast.
 ```javascript
-var broadcast = require('dual-broadcast');
-var b = broadcast();
+var dual = require('dual-protocol').use(require('dual-broadcast'));
 ```
+
+Then domain instances can add broadcast hosts:
+```javascript
+var domain = dual();
+domain.broadcast(['b']);
+```
+
+Here we've provided a specific mount point for the broadcaster.  By default, the broadcaster is mounted at `['broadcast']`.
 
 
 ## Register a broadcast recipient
 
-To register the mount point `['client', xxxxx]` as potential recipient
+To register a mount point `['client', xxxxx]` as potential recipient
 of broadcasts, send a message to
 ```javascript
-b.send(['broadcast', 'register', 'client', xxxxx]);
+domain.send(['b', 'register', 'client', xxxxx]);
 ```
 
-## Subscribe to a broadcast channel
+A map of subscriptions is created for each client.  The subscriptions
+will be removed when a `['disconnect', 'client', xxxx]` event is
+emitted.
 
-To subscribe `['client', xxxxx]` to the broadcast point `['bbc',
+## Subscribe a registered client to a broadcast channel
+
+To subscribe the registered `['client', xxxxx]` to the broadcast point `['bbc',
 'eight']`, send to the subscription host from the broadcast point.
 
 ```javascript
-b.send(['broadcast', 'subscribe', 'client', xxxxx], ['bbc', 'eight']);
+domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']);
 ```
 
 ## Broadcasting
 
-Now, sending to `['broadcast', 'send']`, from the desired broadcast
+Now, sending to `['b', 'send']`, from the desired broadcast
 point, copies the message to all subscribers.
 
 ```javascript
-b.send(['broadcast', 'send'], ['bbc', 'eight'], 'bbc heaven');
+domain.send(['b', 'send'], ['bbc', 'eight'], 'bbc heaven');
 ```
 
 ## Unsubscribing
@@ -44,7 +55,7 @@ Broadcast clients may be unsubscribed from specific subscriptions,
 mirroring the subscription pattern.
 
 ```javascript
-b.send(['broadcast', 'unsubscribe', 'client', xxxxx], ['bbc', 'eight']);
+domain.send(['b', 'unsubscribe', 'client', xxxxx], ['bbc', 'eight']);
 ```
 
 ## Disconnecting
@@ -53,8 +64,19 @@ A client is unsubscribed from all subscriptions, and removed as a
 potential subscription host, by sending a disconnect message.
 
 ```javascript
-b.send(['disconnect', 'client', xxxxx]);
+domain.send(['disconnect', 'client', xxxxx]);
 ```
+
+## Auto-registering clients
+
+Clients may be automatically registered on `['connect', '**']` events
+by using the `autoregister` route.
+
+```javascript
+domain.send(['b', 'autoregister', 'client', '*']);
+domain.send(['connect', 'client', 'zzz']);
+```
+At this point, `['client', 'zzz']` would be registered, as would any `['client', '*']`.
 
 
 
