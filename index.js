@@ -38,8 +38,8 @@ module.exports = function (Domain, libs) {
 
                         subscriptions.mount(subscription, transfer);
                         clientSubscriptions.on(subscription, transfer);
-                        d.send(route.concat(['newListener']), subscription);
-                        d.send(route.concat(['newListener'].concat(client)), subscription);
+                        d.send(route.concat(['newListener']), subscription, subclient);
+                        d.send(route.concat(['newListener'].concat(subscription)), subscription, subclient);
                     };
 
                     var removeSubscription = function (subscription) {
