@@ -33,4 +33,23 @@ describe('dual-broadcast subroutes', function () {
         done();
     });
 
+    it('should emit newlistener events when subscribing sub clients', function (done) {
+        d.mount(['b', 'newListener'], function () {
+            done();
+        });
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'send'], ['source']);
+    });
+
+    it('should include subclient as body of newListener event', function (done) {
+        d.mount(['b', 'newListener'], function (body) {
+            assert.deepEqual(['client', 'a', 'subhost'], body);
+            done();
+        });
+        d.send(['b', 'register', 'client', 'a']);
+        d.send(['b', 'subscribe', 'client', 'a', 'subhost'], ['source']);
+        d.send(['b', 'send'], ['source']);
+    });
+
 });
