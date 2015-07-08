@@ -15,7 +15,6 @@ describe('dual-broadcast removeListener', function () {
 
     describe('unsubscribe', function () { 
         it('should send removeListner messages on unsubscribe', function (done) {
-            var onecalled = false;
             d.mount(['b', 'removeListener'], function () {
                 done();
             });
@@ -24,10 +23,9 @@ describe('dual-broadcast removeListener', function () {
             d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
         });
 
-        it('should include subscriber address in destination ', function (done) {
-            var onecalled = false;
-            d.mount(['b', 'removeListener', '::subscriber'], function (body, ctxt) {
-                assert.deepEqual(['client', '1'], ctxt.params.subscriber);
+        it('should include subscription address in destination ', function (done) {
+            d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+                assert.deepEqual(['source'], ctxt.params.subscription);
                 done();
             });
             d.send(['b', 'register', 'client', '1']);
@@ -35,17 +33,17 @@ describe('dual-broadcast removeListener', function () {
             d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
         });
 
-        // it('should include exact subscriber address in body ', function (done) {
-        //     var onecalled = false;
-        //     d.mount(['b', 'removeListener', '::subscriber'], function (body, ctxt) {
-        //         assert.deepEqual(['client', '1'], body);
-        //         done();
-        //     });
-        //     d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        // });
+        it('should include subscriber address in body', function (done) {
+            d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+                assert.deepEqual(['client', '1'], body);
+                done();
+            });
+            d.send(['b', 'register', 'client', '1']);
+            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+        });
 
         it('should include subscription address in source ', function (done) {
-            var onecalled = false;
             d.mount(['b', 'removeListener', '**'], function (body, ctxt) {
                 assert.deepEqual(['source', 'a'], ctxt.from);
                 done();
@@ -58,7 +56,6 @@ describe('dual-broadcast removeListener', function () {
 
     describe('disconnect', function () {
         it('should send removeListner messages on disconnect', function (done) {
-            var onecalled = false;
             d.mount(['b', 'removeListener', '**'], function () {
                 done();
             });
@@ -67,10 +64,19 @@ describe('dual-broadcast removeListener', function () {
             d.send(['disconnect', 'client', '1']);
         });
 
-        it('should include subscriber address in destination ', function (done) {
-            var onecalled = false;
-            d.mount(['b', 'removeListener', '::subscriber'], function (body, ctxt) {
-                assert.deepEqual(['client', '1'], ctxt.params.subscriber);
+        it('should include subscription address in destination ', function (done) {
+            d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+                assert.deepEqual(['source'], ctxt.params.subscription);
+                done();
+            });
+            d.send(['b', 'register', 'client', '1']);
+            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            d.send(['disconnect', 'client', '1']);
+        });
+
+        it('should include subscriber address in body ', function (done) {
+            d.mount(['b', 'removeListener', '::subscription'], function (body, ctxt) {
+                assert.deepEqual(['client', '1'], body);
                 done();
             });
             d.send(['b', 'register', 'client', '1']);

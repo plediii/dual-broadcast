@@ -14,7 +14,6 @@ describe('dual-broadcast newListener', function () {
     });
 
     it('should send newListener messages on subscriptions', function (done) {
-        var onecalled = false;
         d.mount(['b', 'newListener'], function () {
             done();
         });
@@ -22,10 +21,27 @@ describe('dual-broadcast newListener', function () {
         d.send(['b', 'subscribe', 'client', '1'], ['source']);
     });
 
-    it('should include subscriber address in destination ', function (done) {
-        var onecalled = false;
-        d.mount(['b', 'newListener', '::subscriber'], function (body, ctxt) {
-            assert.deepEqual(['client', '1'], ctxt.params.subscriber);
+    it('should include subscription address in source ', function (done) {
+        d.mount(['b', 'newListener', '::subscription'], function (body, ctxt) {
+            assert.deepEqual(['source'], ctxt.from);
+            done();
+        });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+    });
+
+    it('should include subscription address in destination ', function (done) {
+        d.mount(['b', 'newListener', '::subscription'], function (body, ctxt) {
+            assert.deepEqual(['source'], ctxt.params.subscription);
+            done();
+        });
+        d.send(['b', 'register', 'client', '1']);
+        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+    });
+
+    it('should include subscriber address as body ', function (done) {
+        d.mount(['b', 'newListener', '::subscription'], function (body, ctxt) {
+            assert.deepEqual(['client', '1'], body);
             done();
         });
         d.send(['b', 'register', 'client', '1']);
