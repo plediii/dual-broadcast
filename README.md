@@ -38,7 +38,7 @@ emitted.
 To subscribe the registered `['client', xxxxx]` to the broadcast point `['bbc',
 'eight']`, send to
 
-```javascript domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']); ``` 
+```domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']); ``` 
 with the broadcast point as the source address.  Using the source
 address allows the broadcast source to be automatically layered by transports like
 [dual-engine.io](https://github.com/plediii/dual-engine.io).
