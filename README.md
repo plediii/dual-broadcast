@@ -1,7 +1,7 @@
 
-# Broadcaster for dualapi [![Build Status](https://travis-ci.org/plediii/dual-broadcast.svg?branch=master)](https://travis-ci.org/plediii/dual-broadcast)
+# Broadcaster for dual-protocol [![Build Status](https://travis-ci.org/plediii/dual-broadcast.svg?branch=master)](https://travis-ci.org/plediii/dual-broadcast)
 
-Create a dual api domain with fan-out capability.  
+Add fan-out hosts to a dual-protocol domain.
 
 ## Construct a broadcasting domain
 
