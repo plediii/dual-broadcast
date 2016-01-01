@@ -7,10 +7,10 @@ var dualproto = require('dual-protocol');
 
 describe('dual-broadcast removeListener', function () {
     
-    var d;
+    var d, b;
     beforeEach(function () {
         d = (dualproto.use(require('../index')))()
-        d.broadcast(['b']);
+        b = d.broadcast(['b']);
     });
 
     describe('unsubscribe', function () { 
@@ -18,9 +18,9 @@ describe('dual-broadcast removeListener', function () {
             d.mount(['b', 'removeListener'], function () {
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
-            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
+            b.unsubscribe(['client', '1'], ['source']);
         });
 
         it('should send removeListner messages after removing subscription', function (done) {
@@ -31,9 +31,9 @@ describe('dual-broadcast removeListener', function () {
                 d.send(['b', 'send'], ['source']);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
-            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
+            b.unsubscribe(['client', '1'], ['source']);
         });
 
         it('should include subscription address in destination ', function (done) {
@@ -41,9 +41,9 @@ describe('dual-broadcast removeListener', function () {
                 assert.deepEqual(['source'], ctxt.params.subscription);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
-            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
+            b.unsubscribe(['client', '1'], ['source']);
         });
 
         it('should include subscriber address in body', function (done) {
@@ -51,9 +51,9 @@ describe('dual-broadcast removeListener', function () {
                 assert.deepEqual(['client', '1'], body);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
-            d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subsribe(['client', '1'], ['source']);
+            b.unsubscribe(['client', '1'], ['source']);
         });
 
         it('should include subscription address in source ', function (done) {
@@ -61,9 +61,9 @@ describe('dual-broadcast removeListener', function () {
                 assert.deepEqual(['source', 'a'], ctxt.from);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
-            d.send(['b', 'unsubscribe', 'client', '1'], ['source', 'a']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source', 'a']);
+            b.unsubscribe(['client', '1'], ['source', 'a']);
         });
     });
 
@@ -72,8 +72,8 @@ describe('dual-broadcast removeListener', function () {
             d.mount(['b', 'removeListener', '**'], function () {
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
             d.send(['disconnect', 'client', '1']);
         });
 
@@ -82,8 +82,8 @@ describe('dual-broadcast removeListener', function () {
                 assert.deepEqual(['source'], ctxt.params.subscription);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
             d.send(['disconnect', 'client', '1']);
         });
 
@@ -92,8 +92,8 @@ describe('dual-broadcast removeListener', function () {
                 assert.deepEqual(['client', '1'], body);
                 done();
             });
-            d.send(['b', 'register', 'client', '1']);
-            d.send(['b', 'subscribe', 'client', '1'], ['source']);
+            b.register(['client', '1']);
+            b.subscribe(['client', '1'], ['source']);
             d.send(['disconnect', 'client', '1']);
         });
     });

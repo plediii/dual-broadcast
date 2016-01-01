@@ -7,47 +7,12 @@ var dualproto = require('dual-protocol');
 
 describe('dual-broadcast', function () {
     
-    var d;
+    var d, b;
     beforeEach(function () {
         // d = (dualproto.use(require('../index')))()
         d = (dualproto.use(require('../index')))()
-        d.broadcast(['b']);
+        b = d.broadcast(['b']);
     });
-
-    it('should have listeners for subscribe', function () {
-        assert.notEqual(0, d.listeners(['b', 'register', '**']).length);
-    });
-
-    it('should have listeners for send', function () {
-        assert.notEqual(0, d.listeners(['b', 'send']).length);
-    });
-
-    it('should provide subscribe routes after registering', function () {
-        d.send(['b', 'register', 'client', '1']);
-        assert.notEqual(0, d.listeners(['b', 'subscribe', 'client', '1']));
-        assert.notEqual(0, d.listeners(['b', 'subscribe', 'client', '1', '**']));
-    });
-
-    it('should remove subscribe routes on client disconnect', function () {
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['disconnect', 'client', '1']);
-        assert.equal(0, d.listeners(['b', 'subscribe', 'client', '1']));
-        assert.equal(0, d.listeners(['b', 'subscribe', 'client', '1', '**']));
-    });
-
-    it('should provide unsubscribe routes after registering', function () {
-        d.send(['b', 'register', 'client', '1']);
-        assert.notEqual(0, d.listeners(['b', 'unsubscribe', 'client', '1']));
-        assert.notEqual(0, d.listeners(['b', 'unsubscribe', 'client', '1', '**']));
-    });
-
-    it('should remove unsubscribe routes on client disconnect', function () {
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['disconnect', 'client', '1']);
-        assert.equal(0, d.listeners(['b', 'unsubscribe', 'client', '1']));
-        assert.equal(0, d.listeners(['b', 'unsubscribe', 'client', '1', '**']));
-    });
-
 
     it('should send messages to subscribed hosts', function (done) {
         var onecalled = false;
@@ -58,11 +23,11 @@ describe('dual-broadcast', function () {
             assert(onecalled);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'register', 'client', '2']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'subscribe', 'client', '2'], ['source']);
-        d.send(['b', 'send'], ['source']);
+        b.register(['client', '1']);
+        b.register(['client', '2']);
+        b.subscribe(['client', '1'], ['source']);
+        b.subscribe(['client', '2'], ['source']);
+        b.send(['source']);
     });
 
     it('should *not* allow messages to unregistered hosts', function (done) {
@@ -70,8 +35,8 @@ describe('dual-broadcast', function () {
         d.mount(['client', '1'], function () {
             done('unregistered host');
         });
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source']);
+        b.subscribe(['client', '1'], ['source']);
+        b.send(['source']);
         done();
     });
 
@@ -88,11 +53,11 @@ describe('dual-broadcast', function () {
                 done('unexpected call ' + body);
             }
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source', 'b']);
-        d.send(['b', 'send'], ['source', 'a'], 'a');
-        d.send(['b', 'send'], ['source', 'b'], 'b');
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source', 'a']);
+        b.subscribe(['client', '1'], ['source', 'b']);
+        b.send(['source', 'a'], 'a');
+        b.send(['source', 'b'], 'b');
     });
 
     it('should *not* send messages to unsubscribed hosts', function (done) {
@@ -103,12 +68,12 @@ describe('dual-broadcast', function () {
         d.mount(['client', '2'], function () {
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'register', 'client', '2']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'subscribe', 'client', '2'], ['source']);
-        d.send(['b', 'unsubscribe', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source']);
+        b.register(['client', '1']);
+        b.register(['client', '2']);
+        b.subscribe(['client', '1'], ['source']);
+        b.subscribe(['client', '2'], ['source']);
+        b.unsubscribe(['client', '1'], ['source']);
+        b.send(['source']);
     });
 
     it('should allow unsubscriptions for particular sources', function (done) {
@@ -120,12 +85,12 @@ describe('dual-broadcast', function () {
                 done('unexpected call ' + body);
             }
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source', 'a'], 'a');
-        d.send(['b', 'subscribe', 'client', '1'], ['source', 'b'], 'b');
-        d.send(['b', 'unsubscribe', 'client', '1'], ['source', 'a']);
-        d.send(['b', 'send'], ['source', 'a'], 'a');
-        d.send(['b', 'send'], ['source', 'b'], 'b');
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source', 'a']);
+        b.subscribe(['client', '1'], ['source', 'b']);
+        b.unsubscribe(['client', '1'], ['source', 'a']);
+        b.send(['source', 'a'], 'a');
+        b.send(['source', 'b'], 'b');
     });
 
     it('should send body to subscribed hosts', function (done) {
@@ -133,10 +98,10 @@ describe('dual-broadcast', function () {
             assert.deepEqual({ symbol: 'transcode' }, body);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'register', 'client', '2']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source'], { symbol: 'transcode' });
+        b.register(['client', '1']);
+        b.register(['client', '2']);
+        b.subscribe(['client', '1'], ['source']);
+        b.send(['source'], { symbol: 'transcode' });
     });
 
     it('should send options to subscribed hosts', function (done) {
@@ -144,9 +109,9 @@ describe('dual-broadcast', function () {
             assert.deepEqual({ dial: 'home' }, ctxt.options);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
-        d.send(['b', 'send'], ['source'], null, { dial: 'home' });
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
+        b.send(['source'], null, { dial: 'home'});
     });
 
     it('should send with message "from"', function (done) {
@@ -154,28 +119,28 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['piece', 'of', 'cacke'], ctxt.from);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['piece', 'of', 'cacke']);
-        d.send(['b', 'send'], ['piece', 'of', 'cacke']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['piece', 'of', 'cake']);
+        b.send(['piece', 'of', 'cake']);
     });
 
     it('should allow wild card subscriptions', function (done) {
         d.mount(['client', '1'], function (body, ctxt) {
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
-        d.send(['b', 'send'], ['piece', 'a', 'cacke']);
-    });
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['piece', '*', 'cacke']);
+        b.send(['piece', 'a', 'cacke']);
+      );
 
     it('should send with message "from" even on wildcard subscription', function (done) {
         d.mount(['client', '1'], function (body, ctxt) {
             assert.deepEqual(['piece', 'a', 'cacke'], ctxt.from);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
-        d.send(['b', 'send'], ['piece', 'a', 'cacke']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['piece', '*', 'cacke']);
+        b.send(['piece', 'a', 'cacke']);
     });
 
     it('should auto unsubscribe disconnecting hosts', function (done) {
@@ -183,10 +148,10 @@ describe('dual-broadcast', function () {
         d.mount(['client', '1'], function () {
             done('1 called');
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
         d.send(['disconnect', 'client', '1']);
-        d.send(['b', 'send'], ['source']);
+        b.send(['source']);
         done();
     });
 
@@ -195,10 +160,10 @@ describe('dual-broadcast', function () {
         d.mount(['client', '1'], function () {
             done('1 called');
         });
-        d.send(['b', 'register', 'client']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client']);
+        b.subscribe(['client', '1'], ['source']);
         d.send(['disconnect', 'client']);
-        d.send(['b', 'send'], ['source']);
+        b.send(['source']);
         done();
     });
 
@@ -207,9 +172,9 @@ describe('dual-broadcast', function () {
             assert.deepEqual(['piece', 'a', 'cacke'], ctxt.from);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['piece', '*', 'cacke']);
-        d.send(['b', 'unsubscribe', 'client', '1'], ['piece', 'a', 'cacke']);
-        d.send(['b', 'send'], ['piece', 'a', 'cacke']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['piece', '*', 'cacke']);
+        b.unsubscribe(['client', '1'], ['piece', 'a', 'cacke']);
+        b.send(['piece', 'a', 'cacke']);
     });
 });
