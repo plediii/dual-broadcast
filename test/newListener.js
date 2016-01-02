@@ -26,7 +26,7 @@ describe('dual-broadcast newListener', function () {
             done();
         });
         d.mount(['b', 'newListener'], function () {
-            d.send(['b', 'send'], ['source']);
+            b.send(['source']);
         });
         b.register(['client', '1']);
         b.subscribe(['client', '1'], ['source']);

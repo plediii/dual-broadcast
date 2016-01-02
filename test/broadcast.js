@@ -116,7 +116,7 @@ describe('dual-broadcast', function () {
 
     it('should send with message "from"', function (done) {
         d.mount(['client', '1'], function (body, ctxt) {
-            assert.deepEqual(['piece', 'of', 'cacke'], ctxt.from);
+            assert.deepEqual(['piece', 'of', 'cake'], ctxt.from);
             done();
         });
         b.register(['client', '1']);
@@ -131,7 +131,7 @@ describe('dual-broadcast', function () {
         b.register(['client', '1']);
         b.subscribe(['client', '1'], ['piece', '*', 'cacke']);
         b.send(['piece', 'a', 'cacke']);
-      );
+    });
 
     it('should send with message "from" even on wildcard subscription', function (done) {
         d.mount(['client', '1'], function (body, ctxt) {

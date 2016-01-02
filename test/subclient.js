@@ -58,7 +58,7 @@ describe('dual-broadcast subroutes', function () {
         });
         b.register(['client', 'a']);
         b.subscribe(['client', 'a', 'subhost'], ['source']);
-        b.unusbscribe(['client', 'a', 'subhost'], ['source']);
+        b.unsubscribe(['client', 'a', 'subhost'], ['source']);
     });
 
     it('should emit removeListener events with subscription in destination when unsubscribing sub clients', function (done) {
@@ -78,7 +78,7 @@ describe('dual-broadcast subroutes', function () {
         });
         b.register(['client', 'a']);
         b.subscribe(['client', 'a', 'subhost'], ['source']);
-        b.unusbscribe(['client', 'a', 'subhost'], ['source']);
+        b.unsubscribe(['client', 'a', 'subhost'], ['source']);
     });
 
 });

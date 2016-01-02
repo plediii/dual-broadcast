@@ -52,7 +52,7 @@ describe('dual-broadcast removeListener', function () {
                 done();
             });
             b.register(['client', '1']);
-            b.subsribe(['client', '1'], ['source']);
+            b.subscribe(['client', '1'], ['source']);
             b.unsubscribe(['client', '1'], ['source']);
         });
 

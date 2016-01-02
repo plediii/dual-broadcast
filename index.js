@@ -9,76 +9,77 @@ module.exports = function (Domain, libs) {
         }
         var d = this;
         var subscriptions = new Domain();
-        d.mount(route, {
-            register: {
-                '::client': function (body, ctxt) {
-                    var client = ctxt.params.client;
-                    var prefixlen = ctxt.to.length - client.length;
-                    var clientSubscriptions = new Domain();
-                    var unsubscribeRoute = route.concat('unsubscribe').concat(client);
-                    var subscribeRoute = route.concat('subscribe').concat(client);
+        var clients = new Domain();
 
-                    clientSubscriptions.on(['removeListener'], function (subscription, f) {
-                        subscriptions.removeListener(subscription, f);
-                        d.send(route.concat(['removeListener']), subscription, f.client);
-                        d.send(route.concat(['removeListener'].concat(subscription)), subscription, f.client);
-                    });
+        var register = function (client) {
+            var clientSubscriptions = new Domain();
 
-                    var subscribe = function (body, ctxt) {
-                        var subscription = ctxt.from;
-                        var subclient = ctxt.to.slice(prefixlen);
-                        var transfer = function (body, ctxt) {
-                            d.send({
-                                to: subclient
-                                , from: ctxt.from
-                                , body: body
-                                , options: ctxt.options
-                            });
-                        };
-                        transfer.client = subclient;
-                        subscriptions.mount(subscription, transfer);
-                        clientSubscriptions.on(subscription, transfer);
-                        d.send(route.concat(['newListener']), subscription, subclient);
-                        d.send(route.concat(['newListener'].concat(subscription)), subscription, subclient);
+            clientSubscriptions.on(['removeListener'], function (subscription, f) {
+                subscriptions.removeListener(subscription, f);
+                d.send(route.concat(['removeListener']), subscription, f.client);
+                d.send(route.concat(['removeListener'].concat(subscription)), subscription, f.client);
+            });
+
+            var removeSubscription = function (subscription) {
+                clientSubscriptions.removeAllListeners(subscription);
+            };
+
+            var handleClient = function (body, ctxt) {
+                if (body.subscribe) {
+                    var subscription = body.subscribe;
+                    var subscriber = client;
+                    if (ctxt.params && ctxt.params.subhost) {
+                        subscriber = subscriber.concat(ctxt.params.subhost);
+                    }
+                    var transfer = function (body, ctxt) {
+                        d.send({
+                            to: subscriber
+                            , from: ctxt.from
+                            , body: body
+                            , options: ctxt.options
+                        });
                     };
-
-                    var removeSubscription = function (subscription) {
-                        clientSubscriptions.removeAllListeners(subscription);
-                    };
-                    
-                    var unsubscribe = function (body, ctxt) {
-                        removeSubscription(ctxt.from);
-                    };
-
-                    d.mount(subscribeRoute, subscribe);
-                    d.mount(subscribeRoute.concat('**'), subscribe);
-                    d.mount(unsubscribeRoute, unsubscribe);
-                    d.mount(unsubscribeRoute.concat('**'), unsubscribe);
-                    d.once(['disconnect'].concat(client), function () {
-                        d.unmount(subscribeRoute);
-                        d.unmount(unsubscribeRoute);
-                        removeSubscription('**');
-                    });
+                    transfer.client = subscriber;
+                    subscriptions.mount(subscription, transfer);
+                    clientSubscriptions.on(subscription, transfer);
+                    d.send(route.concat(['newListener']), subscription, subscriber);
+                    d.send(route.concat(['newListener'].concat(subscription)), subscription, subscriber);
+                } else {
+                    // unsubscribe
+                    removeSubscription(body.unsubscribe);
                 }
+            };
+
+            clients.mount(client, handleClient);
+            clients.mount(client.concat('::subhost'), handleClient);
+
+            d.once(['disconnect'].concat(client), function () {
+                clients.unmount(client);
+                removeSubscription('**');
+            });            
+        };
+
+        return {
+            autoregister: function (clients) {
+                d.mount(['connect'].concat(clients), function (body, ctxt) {
+                    register(ctxt.to.slice(1));
+                });
             }
-            , send: function (body, ctxt) {
-                var subscription = ctxt.from;
+            , register: register
+            , send: function (subscription, body, options) {
                 subscriptions.send({
                     to: subscription
                     , from: subscription
                     , body: body
-                    , options: ctxt.options
+                    , options: options
                 });
             }
-            , autoregister: {
-                '::clients': function (body, ctxt) {
-                    var clients = ctxt.params.clients;
-                    var prefixlen = ctxt.to.length - clients.length;
-                    d.mount(['connect'].concat(clients), function (body, ctxt) {
-                        d.send(route.concat('register').concat(ctxt.to.slice(1)));
-                    });
-                }
+            , subscribe: function (client, subscription) {
+                clients.send(client, [], { subscribe: subscription });
             }
-        });
+            , unsubscribe: function (client, subscription) {
+                clients.send(client, [], { unsubscribe: subscription });
+            }
+        };
     };
 };
