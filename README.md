@@ -1,11 +1,11 @@
 
 # Broadcaster for dual-protocol [![Build Status](https://travis-ci.org/plediii/dual-broadcast.svg?branch=master)](https://travis-ci.org/plediii/dual-broadcast)
 
-Add fan-out hosts to a dual-protocol domain.
+Fan-out dual-protocol messages.
 
 ## Construct a broadcasting domain
 
-Any [dual-protocol](https://github.com/plediii/dual-protocol) domain (including [dualapi](https://github.com/plediii/dualapi)), can be extended with dual-broadcast.
+Extend a [dual-protocol](https://github.com/plediii/dual-protocol) domain, with the dual-broadcast module.
 ```javascript
 var dual = require('dual-protocol').use(require('dual-broadcast'));
 ```
@@ -13,43 +13,40 @@ var dual = require('dual-protocol').use(require('dual-broadcast'));
 Domains with this extension can add broadcast hosts:
 ```javascript
 var domain = dual();
-domain.broadcast(['b']);
+var broadcaster = domain.broadcast(['b']);
 ```
 
 Here we've provided a specific mount point for the broadcaster at
-`['b']`.  All the broadcaster functions will be mounted below this
-route.  By default, the broadcaster is mounted at `['broadcast']`.
+`['b']`.  *newListener* and *removeListener* events will be emitted
+below that endpoint.  By default, the broadcaster is mounted at
+`['broadcast']`.
 
 
 ## Register a broadcast recipient
 
 To register a mount point `['client', xxxxx]` as potential recipient
-of broadcasts, send a message to
+of broadcasts:
 ```javascript
-domain.send(['b', 'register', 'client', xxxxx]);
+broadcaster.register(['client', xxxxx]);
 ```
 
 A map of subscriptions is created for each client.  The subscriptions
 will be removed when the `['disconnect', 'client', xxxx]` event is
-emitted.
+emitted on the domain on which the broadcaster is created.
 
 ## Subscribe a registered client to a broadcast channel
 
 To subscribe the registered `['client', xxxxx]` to the broadcast point `['bbc',
-'eight']`, send to
+'eight']`, 
 
-```domain.send(['b', 'subscribe', 'client', xxxxx], ['bbc', 'eight']); ``` 
-with the broadcast point as the source address.  Using the source
-address allows the broadcast source to be automatically layered by transports like
-[dual-engine.io](https://github.com/plediii/dual-engine.io).
+```broadcaster.subscribe(['client', xxxxx], ['bbc', 'eight']); ``` 
+with the broadcast identifier as the second argument.
 
 ## Broadcasting
 
-Now, sending to `['b', 'send']`, from the desired broadcast
-point, copies the message to all subscribers.
-
+Broadcast a message to every subscribed recipient by
 ```javascript
-domain.send(['b', 'send'], ['bbc', 'eight'], 'bbc heaven');
+broadcaster.send(['bbc', 'eight'], 'bbc heaven');
 ```
 
 ## Unsubscribing
@@ -58,13 +55,13 @@ Broadcast clients may be unsubscribed from specific subscriptions,
 mirroring the subscription pattern.
 
 ```javascript
-domain.send(['b', 'unsubscribe', 'client', xxxxx], ['bbc', 'eight']);
+broadcaster.unsubscriber(['client', xxxxx], ['bbc', 'eight']);
 ```
 
 ## Disconnecting
 
 A client is unsubscribed from all subscriptions, and removed as a
-potential subscription host, by sending a disconnect message:
+potential subscription host, by sending a disconnect message on the broadcast domain:
 ```javascript
 domain.send(['disconnect', 'client', xxxxx]);
 ```
@@ -72,13 +69,13 @@ domain.send(['disconnect', 'client', xxxxx]);
 ## Auto-registering clients
 
 Clients may be automatically registered on `['connect', '**']` events
-by using the `autoregister` route.
+by using the `autoregister` function.
 
 ```javascript
-domain.send(['b', 'autoregister', 'client', '*']);
+broadcaster.autoregister(['client', '*']);
 domain.send(['connect', 'client', 'zzz']);
 ```
-At this point, `['client', 'zzz']` would be registered, as would any `['client', '*']`.
+At this point, `['client', 'zzz']` would be registered, as would any other client matching `['client', '*']`.
 
 
 
