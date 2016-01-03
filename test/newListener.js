@@ -7,18 +7,18 @@ var dualproto = require('dual-protocol');
 
 describe('dual-broadcast newListener', function () {
     
-    var d;
+    var d, b;
     beforeEach(function () {
         d = (dualproto.use(require('../index')))()
-        d.broadcast(['b']);
+        b = d.broadcast(['b']);
     });
 
     it('should send newListener messages on subscriptions', function (done) {
         d.mount(['b', 'newListener'], function () {
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
     });
 
     it('should send newListener messages after mounting subscriber', function (done) {
@@ -26,10 +26,10 @@ describe('dual-broadcast newListener', function () {
             done();
         });
         d.mount(['b', 'newListener'], function () {
-            d.send(['b', 'send'], ['source']);
+            b.send(['source']);
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
     });
 
 
@@ -38,8 +38,8 @@ describe('dual-broadcast newListener', function () {
             assert.deepEqual(['source'], ctxt.from);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
     });
 
     it('should include subscription address in destination ', function (done) {
@@ -47,8 +47,8 @@ describe('dual-broadcast newListener', function () {
             assert.deepEqual(['source'], ctxt.params.subscription);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
     });
 
     it('should include subscriber address as body ', function (done) {
@@ -56,8 +56,8 @@ describe('dual-broadcast newListener', function () {
             assert.deepEqual(['client', '1'], body);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
     });
 
     it('should include subscription address in source ', function (done) {
@@ -66,7 +66,8 @@ describe('dual-broadcast newListener', function () {
             assert.deepEqual(['source', 'a'], ctxt.from);
             done();
         });
-        d.send(['b', 'register', 'client', '1']);
-        d.send(['b', 'subscribe', 'client', '1'], ['source', 'a']);
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source', 'a']);
     });
 });
+
