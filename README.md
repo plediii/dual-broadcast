@@ -76,7 +76,8 @@ by using the *autoregister* function.
 broadcaster.autoregister(['client', '*']);
 domain.send(['connect', 'client', 'zzz']);
 ```
-At this point, `['client', 'zzz']` would be registered, as would any other client matching `['client', '*']`.
+At this point, `['client', 'zzz']` would be registered, as would any other client matching `['client', '*']` when they
+connect.
 
 ## *newListener* events
 When a subscriber is added to a broadcast channel, the domain emits a *newListener* event
@@ -86,6 +87,7 @@ domain.mount(['b', 'newListener'], function (body, ctxt) {
 });
 ```
 New subscribers on specific broadcast channels are are emitted *below* the **newListener** endpoint:
+```javascript
 domain.mount(['b', 'newListener', 'bbc', 'eight'], function (body, ctxt) {
    console.log(body.join('/'), ' is now a subscriber to ', ctxt.from.join('/'));
 });
@@ -102,6 +104,7 @@ domain.mount(['b', 'removeListener'], function (body, ctxt) {
 });
 ```
 Subscribers leaving a specific broadcast channel are emitted *below* the **removeListener** endpoint:
+```javascript
 domain.mount(['b', 'removeListener', 'bbc', 'eight'], function (body, ctxt) {
    console.log(body.join('/'), ' is no longer a subscriber to ', ctxt.from.join('/'));
 });
