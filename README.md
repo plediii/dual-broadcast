@@ -38,7 +38,7 @@ emitted on the domain.
 
 To subscribe the registered `['client', xxxxx]` to the broadcast point `['bbc',
 'eight']`: 
-```
+```javascript
 	broadcaster.subscribe(['client', xxxxx], ['bbc', 'eight']); 
 ``` 
 The registered client `['client', xxxxx]` would now receive broadcasts from `['bbc', 'eight']`.
