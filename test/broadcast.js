@@ -14,6 +14,15 @@ describe('dual-broadcast', function () {
         b = d.broadcast(['b']);
     });
 
+    it('should respond true on successful subscriptions', function () {
+        b.register(['client', '1']);
+        assert(b.subscribe(['client', '1'], ['source']), 'expected truthy on successful subscription');
+    });
+
+    it('should respond false on  unsuccessful subscriptions', function () {
+        assert(!b.subscribe(['client', '1'], ['source']), 'expected falsy on unsuccessful subscription');
+    });
+
     it('should send messages to subscribed hosts', function (done) {
         var onecalled = false;
         d.mount(['client', '1'], function () {
