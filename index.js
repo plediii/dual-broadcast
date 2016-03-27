@@ -75,7 +75,7 @@ module.exports = function (Domain, libs) {
                 });
             }
             , subscribe: function (client, subscription) {
-                clients.send(client, [], { subscribe: subscription });
+                return clients.send(client, [], { subscribe: subscription });
             }
             , unsubscribe: function (client, subscription) {
                 clients.send(client, [], { unsubscribe: subscription });
