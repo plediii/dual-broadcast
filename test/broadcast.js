@@ -14,6 +14,15 @@ describe('dual-broadcast', function () {
         b = d.broadcast(['b']);
     });
 
+    it('should respond true on successful subscriptions', function () {
+        b.register(['client', '1']);
+        assert(b.subscribe(['client', '1'], ['source']), 'expected truthy on successful subscription');
+    });
+
+    it('should respond false on  unsuccessful subscriptions', function () {
+        assert(!b.subscribe(['client', '1'], ['source']), 'expected falsy on unsuccessful subscription');
+    });
+
     it('should send messages to subscribed hosts', function (done) {
         var onecalled = false;
         d.mount(['client', '1'], function () {
@@ -91,6 +100,17 @@ describe('dual-broadcast', function () {
         b.unsubscribe(['client', '1'], ['source', 'a']);
         b.send(['source', 'a'], 'a');
         b.send(['source', 'b'], 'b');
+    });
+
+    it('should indicate send success when subscribed hosts exist', function () {
+        d.mount(['client', '1'], function (body) {});
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
+        assert(b.send(['source']));
+    });
+
+    it('should indicate send failure when no subscribed hosts exist', function () {
+        assert(!b.send(['source']));
     });
 
     it('should send body to subscribed hosts', function (done) {
