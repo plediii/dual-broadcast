@@ -102,6 +102,17 @@ describe('dual-broadcast', function () {
         b.send(['source', 'b'], 'b');
     });
 
+    it('should indicate send success when subscribed hosts exist', function () {
+        d.mount(['client', '1'], function (body) {});
+        b.register(['client', '1']);
+        b.subscribe(['client', '1'], ['source']);
+        assert(b.send(['source']));
+    });
+
+    it('should indicate send failure when no subscribed hosts exist', function () {
+        assert(!b.send(['source']));
+    });
+
     it('should send body to subscribed hosts', function (done) {
         d.mount(['client', '1'], function (body) {
             assert.deepEqual({ symbol: 'transcode' }, body);
