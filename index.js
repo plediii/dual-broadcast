@@ -67,7 +67,7 @@ module.exports = function (Domain, libs) {
             }
             , register: register
             , send: function (subscription, body, options) {
-                subscriptions.send({
+                return subscriptions.send({
                     to: subscription
                     , from: subscription
                     , body: body
